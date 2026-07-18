@@ -32,6 +32,45 @@ services:
     volumes:
       - ./redis/replica2/redis.conf:/usr/local/etc/redis/redis.conf
 
+  sentinel1:
+    image: redis:7
+    container_name: sentinel1
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - redis-network
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./sentinel/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
+
+  sentinel2:
+    image: redis:7
+    container_name: sentinel2
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - redis-network
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./sentinel/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
+
+  sentinel3:
+    image: redis:7
+    container_name: sentinel3
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+    depends_on:
+      - redis-master
+    networks:
+      - redis-network
+    ports:
+      - "26381:26379"
+
 networks:
   redis-network:
     name: redis-network
