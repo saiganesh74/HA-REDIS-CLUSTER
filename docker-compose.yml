@@ -8,7 +8,8 @@ services:
     volumes:
       - ./redis/master/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.10
 
   redis-replica:
     image: redis:7
@@ -17,7 +18,8 @@ services:
     depends_on:
       - redis-master
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.11
     volumes:
       - ./redis/replica1/redis.conf:/usr/local/etc/redis/redis.conf
 
@@ -25,7 +27,8 @@ services:
     image: redis:7
     container_name: redis-replica-2
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.12
     depends_on:
       - redis-master
     command: redis-server /usr/local/etc/redis/redis.conf
@@ -35,39 +38,42 @@ services:
   sentinel1:
     image: redis:7
     container_name: sentinel1
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel1.conf
     depends_on:
       - redis-master
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.21
     ports:
       - "26379:26379"
     volumes:
-      - ./sentinel/sentinel1.conf:/usr/local/etc/redis/sentinel.conf
+      - ./sentinel:/usr/local/etc/redis
 
   sentinel2:
     image: redis:7
     container_name: sentinel2
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel2.conf
     depends_on:
       - redis-master
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.22
     ports:
       - "26380:26379"
     volumes:
-      - ./sentinel/sentinel2.conf:/usr/local/etc/redis/sentinel.conf
+      - ./sentinel:/usr/local/etc/redis
 
   sentinel3:
     image: redis:7
     container_name: sentinel3
-    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    command: redis-sentinel /usr/local/etc/redis/sentinel3.conf
     volumes:
-      - ./sentinel/sentinel3.conf:/usr/local/etc/redis/sentinel.conf
+      - ./sentinel:/usr/local/etc/redis
     depends_on:
       - redis-master
     networks:
-      - redis-network
+      redis-network:
+        ipv4_address: 172.30.0.23
     ports:
       - "26381:26379"
 
@@ -75,3 +81,6 @@ networks:
   redis-network:
     name: redis-network
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
