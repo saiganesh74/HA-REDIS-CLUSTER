@@ -1,0 +1,38 @@
+services:
+  redis-master:
+    image: redis:7
+    container_name: redis-master
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/master/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis-network
+
+  redis-replica:
+    image: redis:7
+    container_name: redis-replica
+    command: redis-server /usr/local/etc/redis/redis.conf
+    depends_on:
+      - redis-master
+    networks:
+      - redis-network
+    volumes:
+      - ./redis/replica1/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-replica-2:
+    image: redis:7
+    container_name: redis-replica-2
+    networks:
+      - redis-network
+    depends_on:
+      - redis-master
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/replica2/redis.conf:/usr/local/etc/redis/redis.conf
+
+networks:
+  redis-network:
+    name: redis-network
+    driver: bridge
