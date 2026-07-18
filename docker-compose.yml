@@ -3,8 +3,6 @@ services:
     image: redis:7
     container_name: redis-master
     command: redis-server /usr/local/etc/redis/redis.conf
-    ports:
-      - 6379:6379
     volumes:
       - ./redis/master/redis.conf:/usr/local/etc/redis/redis.conf
     networks:
@@ -77,6 +75,33 @@ services:
     ports:
       - "26381:26379"
 
+  haproxy:
+    build: ./haproxy
+    container_name: haproxy
+    ports:
+      - "6379:6379"
+    networks:
+      - redis-network
+    volumes:
+      - haproxy-runtime:/var/run
+    depends_on:
+      - redis-master
+      - redis-replica
+      - redis-replica-2
+
+  discovery:
+    build: ./discovery
+    container_name: discovery
+    depends_on:
+      - sentinel1
+      - sentinel2
+      - sentinel3
+      - haproxy
+    networks:
+      - redis-network
+    volumes:
+      - haproxy-runtime:/var/run
+
 networks:
   redis-network:
     name: redis-network
@@ -84,3 +109,5 @@ networks:
     ipam:
       config:
         - subnet: 172.30.0.0/24
+volumes:
+  haproxy-runtime:
